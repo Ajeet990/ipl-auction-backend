@@ -14,4 +14,9 @@ class Player extends Model
         'role',
         'base_price',
     ];
+
+    public function bids()
+    {
+        return $this->hasOne(Bid::class)->latestOfMany();
+    }
 }

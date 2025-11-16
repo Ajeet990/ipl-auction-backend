@@ -12,7 +12,7 @@ class PlayerController extends Controller
     public function index()
     {
         try {
-            $players = Player::orderBy('id', 'desc')->get();
+            $players = Player::with('bids')->orderBy('id', 'desc')->get();
             return response()->json([
                 'success' => true,
                 'message' => 'Players retrieved successfully',
@@ -72,6 +72,7 @@ class PlayerController extends Controller
                 'data' => $player
             ]);
         } catch (\Exception $e) {
+            Log::error('Failed to mark current bid player: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to mark current bid player'], 500);
         }
     }   
@@ -79,7 +80,7 @@ class PlayerController extends Controller
     public function getCurrentBidPlayer()
     {
         try {
-            $player = Player::where('current_bid_player', 1)->first();
+            $player = Player::with('bids')->where('current_bid_player', 1)->first();
             if ($player) {
                 return response()->json([
                     'success' => true,

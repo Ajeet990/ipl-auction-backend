@@ -11,4 +11,9 @@ class Bid extends Model
         'amount',
         'bidder_name'
     ];
+
+    public function player()
+    {
+        return $this->belongsTo(Player::class);
+    }
 }

@@ -10,21 +10,22 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use app\Models\Player;
-use Illuminate\Support\Facades\Log;
+use app\Models\Bid;
 
-class PlayerSelected implements ShouldBroadcastNow
+class BidPlaced implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public $player;
-    public function __construct(Player $player)
+
+    public $bid;
+    public function __construct(Bid $bid)
     {
-        $this->player = $player;
+        $this->bid = $bid;
     }
+
 
     /**
      * Get the channels the event should broadcast on.
@@ -35,18 +36,23 @@ class PlayerSelected implements ShouldBroadcastNow
     {
         return new Channel('auction');
     }
-
+    
     public function broadcastAs(): string
     {
-        return 'player.selected';
+        return 'bid.placed';
     }
 
     public function broadcastWith(): array
     {
-        Log::info('Broadcasting player data', ['player' => $this->player->toArray()]);
         return [
-            'player' => $this->player,
-            'bids' => $this->player->bids,
+            'bid' => [
+                'id' => $this->bid->id,
+                'bidder_name' => $this->bid->bidder_name,
+                'amount' => $this->bid->amount,
+                'player_id' => $this->bid->player_id,
+                'created_at' => $this->bid->created_at,
+            ],
+            'player' => $this->bid->player, // Include player info if needed
         ];
     }
 }

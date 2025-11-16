@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Bid;
+use App\Events\BidPlaced;
 
 class BidController extends Controller
 {
@@ -16,7 +17,18 @@ class BidController extends Controller
         ]);
 
         try {
-            $bid = Bid::create($request->all());
+            $latestBid = Bid::where('player_id', $request->player_id)
+                ->orderBy('amount', 'desc')
+                ->first();
+            if ($latestBid && $request->amount <= $latestBid->amount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bid amount must be higher than the current highest bid'
+                ], 400);
+            }
+            $requestData = $request->all();
+            $bid = Bid::create($requestData);
+            event(new BidPlaced($bid));
             return response()->json([
                 'success' => true,
                 'message' => 'Bid created successfully',
